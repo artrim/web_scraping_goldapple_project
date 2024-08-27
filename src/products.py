@@ -1,4 +1,7 @@
+from bs4 import BeautifulSoup
 from selenium import webdriver
+
+from src.scrolldown import scrolldown
 
 
 class Products:
@@ -13,3 +16,71 @@ class Products:
         self.description = description
         self.instruction = instruction
         self.country = country
+
+    @classmethod
+    def cast_to_object_list(cls):
+        cls.driver.get(cls.url_gold_apple)
+        scrolldown(cls.driver, 50)
+        main_page_html = BeautifulSoup(cls.driver.page_source, 'lxml')
+
+        content = main_page_html.find('main')
+        content = content.findChildren(recursive=False)[-2]
+
+        all_parfumes = []
+        for layer in content:
+            try:
+                cards = layer.find('div')
+                cards = cards.findChildren(recursive=False)
+
+                for i in cards:
+                    try:
+                        url = i.find('a').get('href')
+                    except Exception as e:
+                        print(f'Произошла ошибка: {e}')
+                        continue
+                    con = i.find('a')
+                    con = con.findChildren(recursive=False)[-1]
+
+                    price = con.findChildren(recursive=False)[-1]
+                    price = price.find('div').text.split('₽', 1)[0].strip()
+
+                    name = con.findChildren(recursive=False)[-2]
+                    name = name.find('div').text.strip()
+
+                    if 'Пятница' and '%' in name:
+                        name = con.findChildren(recursive=False)[-3]
+                        name = name.find('div').text.strip()
+
+                        type_product = con.findChildren(recursive=False)[-4].text.strip()
+                        try:
+                            rating = con.findChildren(recursive=False)[-5]
+                            rating = rating.find('div').find('div').text.strip()
+                        except Exception as e:
+                            print(f'Произошла ошибка: {e}')
+                            rating = '-'
+
+                    else:
+                        type_product = con.findChildren(recursive=False)[-3].text.strip()
+
+                        try:
+                            rating = con.findChildren(recursive=False)[-4]
+                            rating = rating.find('div').find('div').text.strip()
+                        except Exception as e:
+                            print(f'Произошла ошибка: {e}')
+                            rating = '-'
+
+                    if '.' not in rating:
+                        rating = '-'
+                    if 'от' in price:
+                        price = price[6:]
+
+                    url = 'https://goldapple.ru' + url
+                    full_name = type_product + ' ' + name
+                    instance = cls(full_name, rating, price, url)
+                    all_parfumes.append(instance)
+            except Exception as e:
+                print(f'Произошла ошибка: {e}')
+                continue
+            finally:
+                cls.driver.quit()
+        return all_parfumes
