@@ -1,3 +1,6 @@
+import re
+
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -84,3 +87,36 @@ class Products:
             finally:
                 cls.driver.quit()
         return all_parfumes
+
+    def get_more_information_about_products(self):
+        r = requests.get(self.url)
+        soup = BeautifulSoup(r.text, 'lxml')
+        content = soup.find('main').find('article')
+        content = content.findChildren(recursive=False)[-1]
+        content = content.findChildren(recursive=False)[-1]
+        content = content.find('div')
+        content = content.findChildren(recursive=False)[-1]
+
+        product = content.find('div').find('div').find('div').find('div')
+        description = product.findChildren(recursive=False)[-2].text
+
+        instruction_country = content.find('div').find('div')
+        instruction = instruction_country.findChildren(recursive=False)[1]
+        instruction = instruction.find('div').find('div').text.strip()
+
+        if re.search('[a-zA-Z]', instruction):
+            instruction = '-'
+
+        country = instruction_country.findChildren(recursive=False)[-1]
+        country = country.find('div').find('div').text
+
+        try:
+            country = country.split('страна происхождения', 1)[1]
+            country = country.split('изготовитель', 1)[0]
+        except Exception as e:
+            print(f'Произошла ошибка: {e}')
+            country = '-'
+
+        self.description = description
+        self.instruction = instruction
+        self.country = country
