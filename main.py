@@ -19,4 +19,4 @@ for product in products:
     })
     time.sleep(0.1)
 
-csv_saver(products_list, 'result/products.csv')
+csv_saver(products_list, 'results/products.csv')

@@ -1,0 +1,9 @@
+---------- coverage: platform linux, python 3.10.12-final-0 ----------
+Name                Stmts   Miss  Cover   Missing
+-------------------------------------------------
+src/__init__.py         0      0   100%
+src/csv_saver.py        4      0   100%
+src/products.py        98      0   100%
+src/scrolldown.py       5      0   100%
+-------------------------------------------------
+TOTAL                 107      0   100%
