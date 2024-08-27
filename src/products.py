@@ -120,3 +120,7 @@ class Products:
         self.description = description
         self.instruction = instruction
         self.country = country
+
+    def __str__(self):
+        return (f'Название: {self.name}, \nРейтинг: {self.rating}, \nЦена: {self.price}, \nURL: {self.url}, '
+                f'\nОписание: {self.description}, \nИнструкция: {self.instruction}, \nСтрана: {self.country}')
